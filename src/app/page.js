@@ -1,69 +1,84 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+
+import { useState } from 'react'
+
+const CURSOS = [
+  { id: 1, titulo: 'React Moderno com Hooks', categoria: 'Front-end', nivel: 'Intermediário', carga: '24h' },
+  { id: 2, titulo: 'APIs RESTful com Node.js e Express', categoria: 'Back-end', nivel: 'Intermediário', carga: '30h' },
+  { id: 3, titulo: 'TypeScript na Prática', categoria: 'Front-end', nivel: 'Básico', carga: '16h' },
+  { id: 4, titulo: 'Docker e Deploy em Nuvem', categoria: 'DevOps', nivel: 'Avançado', carga: '20h' },
+  { id: 5, titulo: 'Banco de Dados PostgreSQL', categoria: 'Back-end', nivel: 'Básico', carga: '18h' },
+  { id: 6, titulo: 'Arquitetura CSS e Tailwind', categoria: 'Front-end', nivel: 'Básico', carga: '12h' }
+]
 
 export default function Home() {
+  const [busca, setBusca] = useState('')
+  const [categoria, setCategoria] = useState('Todos')
+  const [favoritos, setFavoritos] = useState([1])
+
+  const alternarFavorito = (id) => {
+    setFavoritos((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    )
+  }
+
+  const cursosFiltrados = CURSOS.filter((curso) => {
+    const bateCategoria = categoria === 'Todos' || curso.categoria === categoria
+    const bateBusca = curso.titulo.toLowerCase().includes(busca.toLowerCase())
+    return bateCategoria && bateBusca
+  })
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="app">
+      <header className="topo">
+        <div>
+          <span className="tag">Projeto 04 • Next.js</span>
+          <h1>Catálogo de Cursos Tech</h1>
+        </div>
+        <div className="fav-badge">★ Favoritos: {favoritos.length}</div>
+      </header>
+
+      <div className="controles">
+        <input
+          type="text"
+          placeholder="Buscar curso..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
         />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.js</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+        <div className="filtros">
+          {['Todos', 'Front-end', 'Back-end', 'DevOps'].map((cat) => (
+            <button
+              key={cat}
+              className={categoria === cat ? 'ativo' : ''}
+              onClick={() => setCategoria(cat)}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              {cat}
+            </button>
+          ))}
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </div>
+
+      <main className="grid">
+        {cursosFiltrados.map((curso) => {
+          const isFav = favoritos.includes(curso.id)
+          return (
+            <article key={curso.id} className="card">
+              <div className="card-top">
+                <span className="cat">{curso.categoria}</span>
+                <span className="carga">{curso.carga}</span>
+              </div>
+              <h2>{curso.titulo}</h2>
+              <p className="nivel">Nível: {curso.nivel}</p>
+              <button
+                className={`btn-fav ${isFav ? 'favoritado' : ''}`}
+                onClick={() => alternarFavorito(curso.id)}
+              >
+                {isFav ? '★ Favoritado' : '☆ Favoritar'}
+              </button>
+            </article>
+          )
+        })}
       </main>
     </div>
-  );
+  )
 }
